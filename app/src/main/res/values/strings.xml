@@ -8,4 +8,5 @@
     <string name="limpeza">Limpeza</string>
     <string name="categoria">Categoria</string>
     <string name="todo">TODO</string>
+    <string name="limpar_lista">Limpar lista</string>
 </resources>
