@@ -1,10 +1,9 @@
 package com.nyller.android.shoppinglist.ui
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.nyller.android.shoppinglist.databinding.ActivityAddProductBinding
 import com.nyller.android.shoppinglist.domain.Product
 
@@ -29,7 +28,7 @@ class AddProductActivity : AppCompatActivity() {
         val rbSelected = binding.radioGroup.checkedRadioButtonId
 
         if (binding.edtProductNameText.text.isNullOrEmpty()) {
-            Toast.makeText(this, "Insira um nome para o produto!", Toast.LENGTH_SHORT).show()
+            binding.edtProductNameText.error = "Insira um nome para o produto!"
             binding.edtProductNameText.requestFocus()
             return
         }
@@ -37,7 +36,7 @@ class AddProductActivity : AppCompatActivity() {
         if (rbSelected == binding.rbLimpeza.id) category = "Limpeza"
         if (rbSelected == binding.rbAlimentos.id) category = "Alimentos"
         if (rbSelected == -1) {
-            Toast.makeText(this, "Selecione uma categoria para o produto!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Selecione a categoria do produto!", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -52,7 +51,8 @@ class AddProductActivity : AppCompatActivity() {
     private fun saveNewProduct() {
         val product = Product(
             name = binding.edtProductNameText.text.toString(),
-            category = category
+            category = category,
+            state = false
         )
 
         val replyIntent = Intent()

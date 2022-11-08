@@ -1,18 +1,17 @@
 package com.nyller.android.shoppinglist
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.widget.LinearLayout
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.view.MenuProvider
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nyller.android.shoppinglist.adapter.ProductAdapter
@@ -25,19 +24,22 @@ import com.nyller.android.shoppinglist.ui.MainViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
-    private val binding : ActivityMainBinding by lazy {
+    private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private val mViewModel : MainViewModel by viewModels {
+    private val mViewModel: MainViewModel by viewModels {
         MainViewModelFactory((application as MyApplication).repository)
     }
+
+    private val dataStore: DataStore<Preferences> by preferencesDataStore("settings")
 
     private val getResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            val newProduct = result.data?.getSerializableExtra(AddProductActivity.EXTRA_REPLY) as Product
+            val newProduct =
+                result.data?.getSerializableExtra(AddProductActivity.EXTRA_REPLY) as Product
             mViewModel.insert(newProduct)
         }
     }
@@ -47,18 +49,34 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupActionBar()
+        setupLayout()
 
         val adapter = ProductAdapter(ProductAdapter.ProductClickListener { product ->
             mViewModel.onProductClicked(product)
-            Toast.makeText(this, "Produto: ${product.name}", Toast.LENGTH_SHORT).show()
+
+            val dialog = AlertDialog.Builder(this)
+            dialog.apply {
+                setTitle("Remover item")
+                setMessage("Deseja remover este item da Lista? \n Item: ${product.name}")
+                setPositiveButton("Sim") {_, _ ->
+                    mViewModel.delete(product)
+                    Toast.makeText(this@MainActivity, "Item removido!", Toast.LENGTH_SHORT).show()
+                }
+                setNegativeButton("Cancelar") {dialog, _ ->
+                    dialog.dismiss()
+                }
+                dialog.show()
+            }
         })
 
         binding.recyclerView.adapter = adapter
-        binding.recyclerView.setHasFixedSize(true)
-        binding.recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
 
         mViewModel.allProducts.observe(this) { products ->
             products?.let { adapter.addHeaderAndSubmitList(it) }
+            if (products.isEmpty()) binding.tvHasItem.visibility =
+                View.VISIBLE else binding.tvHasItem.visibility = View.GONE
+
+            Log.i("Edu", " Products : $products")
         }
 
         mViewModel.onProductDetail.observe(this) { product ->
@@ -66,6 +84,17 @@ class MainActivity : AppCompatActivity() {
                 mViewModel.onProductOpened()
             }
         }
+
+    }
+
+    private fun setupLayout() {
+        binding.recyclerView.setHasFixedSize(true)
+        binding.recyclerView.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                LinearLayoutManager.VERTICAL
+            )
+        )
 
     }
 

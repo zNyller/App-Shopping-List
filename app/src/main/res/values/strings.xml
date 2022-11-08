@@ -9,4 +9,5 @@
     <string name="categoria">Categoria</string>
     <string name="todo">TODO</string>
     <string name="limpar_lista">Limpar lista</string>
+    <string name="hasItem">Adicione produtos à sua Lista de Compras \n Eles serão listados aqui!</string>
 </resources>

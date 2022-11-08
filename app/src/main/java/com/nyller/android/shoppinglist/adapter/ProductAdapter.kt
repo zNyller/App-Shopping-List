@@ -1,7 +1,11 @@
 package com.nyller.android.shoppinglist.adapter
 
+import android.util.Log
+import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.CheckBox
+import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -14,16 +18,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val ITEM_VIEW_TYPE_HEADER = 0
-private val ITEM_VIEW_TYPE_ITEM = 1
+private const val ITEM_VIEW_TYPE_HEADER = 0
+private const val ITEM_VIEW_TYPE_ITEM = 1
 
 private val adapterScope = CoroutineScope(Dispatchers.Default)
 
 class ProductAdapter(
-    val clickListener: ProductClickListener
+    private val clickListener: ProductClickListener,
 ) : ListAdapter<ProductAdapter.DataItem, RecyclerView.ViewHolder>(DiffCallback()) {
 
-    class HeaderViewHolder(val binding : HeaderBinding): RecyclerView.ViewHolder(binding.root) {
+    class HeaderViewHolder(private val binding : HeaderBinding): RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: DataItem.Header) {
             with(binding) {
@@ -40,15 +44,27 @@ class ProductAdapter(
         }
     }
 
-    class ProductViewHolder private constructor(val binding: ItemProductBinding) :
+    class ProductViewHolder private constructor(private val binding: ItemProductBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        private val productStateArray = SparseBooleanArray()
+
+        private val cbProduct = binding.cbProduct
 
         fun bind(
             product: Product,
-            clickListener: ProductClickListener
+            clickListener: ProductClickListener,
         ) {
             binding.product = product
             binding.clickListener = clickListener
+
+            cbProduct.isChecked = productStateArray[adapterPosition, false]
+
+            binding.cbProduct.setOnClickListener {
+                Log.i("Edu", "State: ${cbProduct.isChecked}")
+                product.state = cbProduct.isChecked
+                productStateArray.put(adapterPosition, cbProduct.isChecked)
+            }
         }
 
         companion object {
@@ -83,7 +99,6 @@ class ProductAdapter(
             withContext(Dispatchers.Main) {
                 submitList(listDataItem)
             }
-
         }
 
     }
@@ -94,7 +109,7 @@ class ProductAdapter(
                 val item = getItem(position) as DataItem.ProductItem
                 holder.bind(
                     item.product,
-                    clickListener
+                    clickListener,
                 )
             }
             is HeaderViewHolder -> {
@@ -128,7 +143,16 @@ class ProductAdapter(
     }
 
     class ProductClickListener(val clickListener: (productId: Product) -> Unit) {
-        fun onClick(product: Product) = clickListener(product)
+        fun onLongClick(product: Product): Boolean {
+            clickListener(product)
+            return true
+        }
+
+        fun onCheckedClick(cb: Product): Boolean {
+            clickListener(cb)
+            return true
+        }
+
     }
 
 

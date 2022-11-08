@@ -11,7 +11,7 @@
         <variable
             name="clickListener"
             type="com.nyller.android.shoppinglist.adapter.ProductAdapter.ProductClickListener" />
-        
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -22,7 +22,7 @@
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:onClick="@{() -> clickListener.onClick(product)}"
+            android:onLongClick="@{() -> clickListener.onLongClick(product)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -41,13 +41,12 @@
                     android:text="@{product.name}"
                     tools:text="@string/produto"
                     android:textColor="@color/black"
-                    android:textSize="18sp" />
+                    android:textSize="17sp" />
 
                 <CheckBox
-                    android:id="@+id/checkBox"
+                    android:id="@+id/cbProduct"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-
 
             </LinearLayout>
 

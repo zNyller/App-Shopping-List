@@ -9,5 +9,6 @@ import java.io.Serializable
 data class Product (
     @PrimaryKey(autoGenerate = true) var id : Int = 0,
     @ColumnInfo(name = "name") var name : String,
-    @ColumnInfo(name = "category") var category : String
+    @ColumnInfo(name = "category") var category : String,
+    @ColumnInfo(name = "state") var state : Boolean
     ) : Serializable
